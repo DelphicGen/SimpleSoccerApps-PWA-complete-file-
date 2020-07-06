@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="My Second PWA"/>
+    <meta name="theme-color" content="#808080"/>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Merriweather|Montserrat|Sacramento&display=swap"
+    rel="stylesheet">
+
+    <link rel="manifest" href="/manifest.json">
+
+    <title>Submission 2 PWA</title>
+</head>
+<body>
+    
+    <header class="black-text landing-page-header">
+        <nav class="nav-wrapper transparent" role="navigation">
+            <div class="container">
+                <a href="./index.html" class="brand-logo black-text" id="logo-container">FC</a>
+                <a class='dropdown-trigger btn right green darken-4' href='#' data-target='dropdown1'>More</a>
+                <ul id='dropdown1' class='dropdown-content'>
+                    <li><a href="./league.html?id=2021">PL Standings</a></li>
+                    <li><a href="./league.html?id=2014">La Liga Standings</a></li>
+                    <li><a class="saved-page" href="#saved">Saved Fixtures</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="landing-page container">
+        </div>
+    </header>
+
+    <main class="main" id="main">
+        <div class="main-content container center-align">
+
+        </div>
+    </main>
+
+
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.min.js"
+      integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        function registerServiceWorker() {
+            return navigator.serviceWorker.register('./service-worker.js')
+                .then(function (registration) {
+                // console.log('Registrasi service worker berhasil.');
+                    var serviceWorker;
+                    if (registration.installing) {
+                        serviceWorker = registration.installing;
+                        // console.log('Service worker installing');
+                    } else if (registration.waiting) {
+                        serviceWorker = registration.waiting;
+                        // console.log('Service worker installed & waiting');
+                    } else if (registration.active) {
+                        serviceWorker = registration.active;
+                        // console.log('Service worker active');
+                        
+                    }
+                    if (serviceWorker) {
+                        console.log("sw current state", serviceWorker.state);
+                        if (serviceWorker.state == "activated") {
+                            //If push subscription wasnt done yet have to do here
+                            console.log("sw already activated - Do watever needed here");
+                            // return registration;
+                            requestPermission();
+                        }
+                        serviceWorker.addEventListener("statechange", function(e) {
+                            console.log("sw statechange : ", e.target.state);
+                            if (e.target.state == "activated") {
+                                // use pushManger for subscribing here.
+                                console.log("Just now activated. now we can subscribe for push notification")
+                                // subscribeForPushNotification(reg);
+                                // return registration;
+                                requestPermission();
+                            }
+                        });
+                    }
+                })
+                .catch(function (err) {
+                    console.error('Registrasi service worker gagal.', err);
+                });
+        }
+        function requestPermission() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(function (result) {
+                    if (result === "denied") {
+                        console.log("Fitur notifikasi tidak diijinkan.");
+                        return;
+                    } else if (result === "default") {
+                        console.error("Pengguna menutup kotak dialog permintaan ijin.");
+                        return;
+                    }
+                    
+                    // navigator.serviceWorker.getRegistration().then(function(reg) {
+                    // reg.showNotification('Notifikasi diijinkan!');
+                    // });
+                    if (('PushManager' in window)) {
+                        navigator.serviceWorker.getRegistration().then(function(registration) {
+                            registration.pushManager.subscribe({
+                                userVisibleOnly: true,
+                                applicationServerKey: urlBase64ToUint8Array('BMiHA91-rOrTB5yBSFyuDvc8sZhZYCM_jaVmxawQxA6D7MyW5BqPjbGlplrIoP5sfJOJvq7u4xy4c9YfssiJX10')
+                            }).then(function(subscribe) {
+                                console.log('Berhasil melakukan subscribe dengan endpoint: ', subscribe.endpoint);
+                                console.log('Berhasil melakukan subscribe dengan p256dh key: ', btoa(String.fromCharCode.apply(
+                                    null, new Uint8Array(subscribe.getKey('p256dh')))));
+                                console.log('Berhasil melakukan subscribe dengan auth key: ', btoa(String.fromCharCode.apply(
+                                    null, new Uint8Array(subscribe.getKey('auth')))));
+                            }).catch(function(e) {
+                                console.error('Tidak dapat melakukan subscribe ', e.message);
+                            });
+                        });
+                    }
+                });
+            }
+        }
+
+
+        if (!('serviceWorker' in navigator)) {
+            console.log("Service worker tidak didukung browser ini.");
+        } else {
+            registerServiceWorker()
+                // .then(registration => {
+                //     requestPermission();
+                // })
+        }
+    </script>
+</body>
+</html>
+
+<!-- {"publicKey":"BMiHA91-rOrTB5yBSFyuDvc8sZhZYCM_jaVmxawQxA6D7MyW5BqPjbGlplrIoP5sfJOJvq7u4xy4c9YfssiJX10","privateKey":"go1upL0mNJSPnxKYk-x7SPpXQJJeFT00yCbXBU28vIA"} -->
