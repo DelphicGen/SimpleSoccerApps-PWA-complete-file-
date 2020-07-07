@@ -16,48 +16,50 @@ import {saveAllForLater, saveForLater, getAll, deleteAllMatches, deleteMatch} fr
 
             caches.match(`${baseUrl}/matches`)
             .then(response => {
-                return response.json();
+                if(response) return response.json();
             })
             .then(data => {
-                allMatches = data;
-                let matchHTML = `
-                    <h2>Upcoming Match(es)</h2>
-                    <a class="save-all-btn btn-small green">
-                        <i class="large material-icons">save</i>
-                        Save All
-                    </a>
-                    <i class="material-icons prefix icon icon-1 fast">sports_soccer</i>
-                    <i class="material-icons prefix icon icon-2">sports_soccer</i>
-                    <i class="material-icons prefix icon icon-3 slow">sports_soccer</i>
-                    <i class="material-icons prefix icon icon-4 very-slow">sports_soccer</i>
-                `;
-                data.matches.forEach(match => {
-                    matchHTML += `
-                        <div data-aos="flip-down" data-aos-duration="500">
-                            <div class="col l12 center-align">
-                                <h5>
-                                    ${match.utcDate}
-                                    <i class="material-icons prefix">sports_soccer</i>
-                                </h5>
+                if(data) {
+                    allMatches = data;
+                    let matchHTML = `
+                        <h2>Upcoming Match(es)</h2>
+                        <a class="save-all-btn btn-small green">
+                            <i class="large material-icons">save</i>
+                            Save All
+                        </a>
+                        <i class="material-icons prefix icon icon-1 fast">sports_soccer</i>
+                        <i class="material-icons prefix icon icon-2">sports_soccer</i>
+                        <i class="material-icons prefix icon icon-3 slow">sports_soccer</i>
+                        <i class="material-icons prefix icon icon-4 very-slow">sports_soccer</i>
+                    `;
+                    data.matches.forEach(match => {
+                        matchHTML += `
+                            <div data-aos="flip-down" data-aos-duration="500">
+                                <div class="col l12 center-align">
+                                    <h5>
+                                        ${match.utcDate}
+                                        <i class="material-icons prefix">sports_soccer</i>
+                                    </h5>
+                                </div>
+                                <div class="match row valign-wrapper">
+                                    <a class="save-btn btn-small" id="${match.id}">
+                                        <i class="large material-icons">save</i>
+                                    </a>
+                                    <div class="col s4 left-align">
+                                        <h5>${match.homeTeam.name}</h5>
+                                    </div>
+                                    <div class="col s4 center-align">
+                                        <h6>vs</h6>
+                                    </div>
+                                    <div class="col s4 right-align">
+                                        <h5>${match.awayTeam.name}</h5>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="match row valign-wrapper">
-                                <a class="save-btn btn-small" id="${match.id}">
-                                    <i class="large material-icons">save</i>
-                                </a>
-                                <div class="col s4 left-align">
-                                    <h5>${match.homeTeam.name}</h5>
-                                </div>
-                                <div class="col s4 center-align">
-                                    <h6>vs</h6>
-                                </div>
-                                <div class="col s4 right-align">
-                                    <h5>${match.awayTeam.name}</h5>
-                                </div>
-                            </div>
-                        </div>
-                    `
-                })
-                $('.landing-page').html(matchHTML);
+                        `
+                    })
+                    $('.landing-page').html(matchHTML);
+                }
             })
         } 
 
